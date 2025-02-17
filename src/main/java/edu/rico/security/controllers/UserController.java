@@ -1,4 +1,4 @@
-package edu.rico.security.entities;
+package edu.rico.security.controllers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.rico.security.entities.User;
 import edu.rico.security.request.UserRequest;
 import edu.rico.security.services.IUserService;
 
