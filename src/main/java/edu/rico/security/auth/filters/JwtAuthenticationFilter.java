@@ -2,6 +2,7 @@ package edu.rico.security.auth.filters;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.rico.security.entities.User;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,8 +49,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
             String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
-            String originalInput = SECRET_KEY + "." + username;
-            String token = Base64.getEncoder().encodeToString(originalInput.getBytes());
+            String token = Jwts.builder()
+                            .setSubject(username)
+                            .setIssuedAt(new Date())
+                            .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+                            .signWith(SECRET_KEY).compact();
 
             response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
             Map<String, Object> body = new HashMap<>();

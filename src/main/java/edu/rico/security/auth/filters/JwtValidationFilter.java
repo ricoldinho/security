@@ -16,6 +16,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,26 +37,24 @@ public class JwtValidationFilter extends BasicAuthenticationFilter{
             chain.doFilter(request, reponse);
             return;
         }
+
         String token = header.replace(PREFIX_TOKEN, "");
-        byte[] tokenDecodeBytes = Base64.getDecoder().decode(token);
-        String tokenDecodeString = new String(tokenDecodeBytes);
-        String[] tokenParts = tokenDecodeString.split("\\.");
-        String secret = tokenParts[0];
-        String username = tokenParts[1];
-        logger.info(String.format("El usuario que viene dentro del token es %s", username));
-        logger.info(String.format("El secreto que viene dentro del token es %s", secret));
-
-
-        if(SECRET_KEY.equals(secret)){
+        try{
+            Claims claims = Jwts.parserBuilder()
+            .setSigningKey(SECRET_KEY)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+            String username = claims.getSubject();
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,null,authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, reponse);
-        }else{
+        }catch(JwtException e){
             Map<String, Object> body = new HashMap<>();
-            body.put("mensaje", "Token incorrecto");
+            body.put("error", e.getMessage());
+            body.put("mensaje", "Token inválido");
             reponse.getWriter().write(new ObjectMapper().writeValueAsString(body));
             reponse.setStatus(403);
             reponse.setContentType("application/json");
