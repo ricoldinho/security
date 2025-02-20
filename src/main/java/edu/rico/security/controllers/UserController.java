@@ -40,7 +40,7 @@ public class UserController {
     public ResponseEntity<?> show(@PathVariable Long id) {
         Optional<User> userOptionl = service.findById(id);
         if (userOptionl.isPresent()) {
-            return ResponseEntity.status(HttpStatus.FOUND).body(userOptionl.orElseThrow());
+            return ResponseEntity.ok().body(userOptionl.orElseThrow());
         }
         return ResponseEntity.notFound().build();
     }
