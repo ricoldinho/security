@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import edu.rico.security.auth.filters.JwtAuthenticationFilter;
+import edu.rico.security.auth.filters.JwtValidationFilter;
 
 @Configuration
 public class SpringSecurityConfig {
@@ -39,10 +40,10 @@ public class SpringSecurityConfig {
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtValidationFilter(authenticationManager()))
                 .csrf(config -> config.disable())
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
-        
     }
 
     /*
@@ -53,8 +54,8 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/users").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
-            .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
+            .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+            .addFilter(new JwtValidationFilter(authenticationManager()))
             .csrf(csrf -> csrf.disable()) 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
 

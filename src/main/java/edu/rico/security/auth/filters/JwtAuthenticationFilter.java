@@ -17,6 +17,7 @@ import edu.rico.security.entities.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import static edu.rico.security.auth.TokenJwtConfig.*;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
@@ -41,16 +42,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new RuntimeException(e);
         }
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
-        System.out.println(authToken);
         return authenticationManager.authenticate(authToken);
     }
 
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
             String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
-            String originalInput = "PALABRA_SECRETA." + username;
+            String originalInput = SECRET_KEY + "." + username;
             String token = Base64.getEncoder().encodeToString(originalInput.getBytes());
 
-            response.addHeader("Authorization", "Bearer " + token);
+            response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
             Map<String, Object> body = new HashMap<>();
             body.put("token", token);
             body.put("mensaje", String.format("Hola %s, has iniciado sesión con éxito", username));
