@@ -2,6 +2,7 @@ package edu.rico.security.auth.filters;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,11 +11,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.rico.security.entities.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,7 +52,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
             String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
+            Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+            boolean isAdmin = roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+            Claims claims = Jwts.claims();
+            claims.put("authorities", new ObjectMapper().writeValueAsString(roles));
+            claims.put("isAdmin", isAdmin);
             String token = Jwts.builder()
+                            .setClaims(claims)
                             .setSubject(username)
                             .setIssuedAt(new Date())
                             .setExpiration(new Date(System.currentTimeMillis() + 3600000))

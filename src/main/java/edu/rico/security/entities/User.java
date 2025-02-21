@@ -29,7 +29,7 @@ public class User {
     @JoinTable(name = "users_roles", 
     joinColumns = @JoinColumn(name = "user_id"), 
     inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<Roles> roles;
+    private List<Role> roles;
 
     
     
@@ -65,11 +65,11 @@ public class User {
         this.email = email;
     }
 
-    public List<Roles> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<Roles> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
     }
 

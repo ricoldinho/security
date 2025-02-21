@@ -9,13 +9,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
-public class Roles {
+@Table(name = "roles")
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
     private String name;
+
+    public Role() {
+    }
+    public Role(String name){
+        this.name = name;
+    }
     public Long getId() {
         return id;
     }

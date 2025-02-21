@@ -1,5 +1,6 @@
 package edu.rico.security.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,7 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.rico.security.entities.Role;
 import edu.rico.security.entities.User;
+import edu.rico.security.repositories.RoleRepository;
 import edu.rico.security.repositories.UserRepository;
 import edu.rico.security.request.UserRequest;
 
@@ -17,7 +20,10 @@ import edu.rico.security.request.UserRequest;
 public class UserServiceImpl implements IUserService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -25,20 +31,26 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return (List<User>) repository.findAll();
+        return (List<User>) userRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
-        return repository.findById(id);
+        return userRepository.findById(id);
     }
 
     @Override
     @Transactional
     public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return repository.save(user);
+        Optional<Role> o = roleRepository.findByName("ROLE_USER");
+        List<Role> roles = new ArrayList<>();
+        if (o.isPresent()) {
+            roles.add(o.orElseThrow());
+        }
+        user.setRoles(roles);
+        return userRepository.save(user);
     }
 
     @Override
@@ -58,7 +70,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void remove(Long id) {
-        repository.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     
