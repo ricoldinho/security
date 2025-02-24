@@ -31,12 +31,13 @@ public class SpringSecurityConfig {
     AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
+/*
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.GET, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("ADMIN");
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
@@ -45,23 +46,25 @@ public class SpringSecurityConfig {
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
-
-    /*
+ */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((authz) -> authz 
                 .requestMatchers(HttpMethod.GET, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/users").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilter(new JwtAuthenticationFilter(authenticationManager()))
             .addFilter(new JwtValidationFilter(authenticationManager()))
             .csrf(csrf -> csrf.disable()) 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
-
         return http.build();
     }
-     */
+     
 
 
 }
