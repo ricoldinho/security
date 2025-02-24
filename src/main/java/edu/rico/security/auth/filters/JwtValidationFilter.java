@@ -2,7 +2,9 @@ package edu.rico.security.auth.filters;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.rico.security.auth.SimpleGrantedAuthorityJsonCreator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -45,9 +48,11 @@ public class JwtValidationFilter extends BasicAuthenticationFilter{
             .build()
             .parseClaimsJws(token)
             .getBody();
+            Object authoritiesClaims = claims.get("authorities");
+            Collection <? extends GrantedAuthority> authorities = Arrays.asList(new ObjectMapper()
+                                                                                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+                                                                                    .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
             String username = claims.getSubject();
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,null,authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, reponse);
