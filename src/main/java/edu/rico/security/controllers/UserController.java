@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.rico.security.entities.User;
+import edu.rico.security.entities.dto.UserDto;
 import edu.rico.security.request.UserRequest;
 import edu.rico.security.services.IUserService;
 
@@ -32,13 +33,13 @@ public class UserController {
     private IUserService service;
 
     @GetMapping
-    public List<User> list() {
+    public List<UserDto> list() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-        Optional<User> userOptionl = service.findById(id);
+        Optional<UserDto> userOptionl = service.findById(id);
         if (userOptionl.isPresent()) {
             return ResponseEntity.ok().body(userOptionl.orElseThrow());
         }
@@ -58,7 +59,7 @@ public class UserController {
         if(result.hasErrors()){
             return validation(result);
         }
-        Optional<User> o = service.update(user, id);
+        Optional<UserDto> o = service.update(user, id);
         
         if (o.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
@@ -68,7 +69,7 @@ public class UserController {
     
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remove(@PathVariable Long id) {
-        Optional<User> o = service.findById(id);
+        Optional<UserDto> o = service.findById(id);
 
         if (o.isPresent()) {
             service.remove(id);
